@@ -31,25 +31,30 @@ tck::gui::ui_main::~ui_main()
 int tck::gui::ui_main::run(HINSTANCE _hInstance, int nCmdShow)
 {
     // Console de debug
-    AllocConsole() ;
+    /*AllocConsole();
     AttachConsole(GetCurrentProcessId());
-    freopen("CON", "w", stdout);
+    freopen("CON", "w", stdout);*/
 
     MSG       msg = {0};
-    WNDCLASS  wc  = {0};
+    WNDCLASSEX  wc  = {0};
     hInstance = _hInstance;
 
+    HICON icon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
+
     // Paramétrage de la fenetre
+    wc.cbSize        = sizeof(wc);
     wc.style         = CS_HREDRAW | CS_VREDRAW;
     wc.cbWndExtra    = DLGWINDOWEXTRA;
     wc.hInstance     = hInstance;
     wc.hCursor       = LoadCursor(NULL, (LPCSTR)IDC_POINTER);
-    wc.hIcon         = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
+    wc.hIcon         = icon;
+    wc.hIconSm       = (HICON)LoadImage(hInstance, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
     wc.lpfnWndProc   = DefDlgProcW;
     wc.lpszClassName = "ui_main";
 
-    if (!RegisterClass(&wc))
+    if (!RegisterClassEx(&wc))
     {
+        int err = GetLastError();
         return 0;
     }
 
@@ -63,6 +68,9 @@ int tck::gui::ui_main::run(HINSTANCE _hInstance, int nCmdShow)
 
     // Afficher la fenetre
     ShowWindow(hWndApp, nCmdShow);
+
+    SendMessage(hWndApp, WM_SETICON, ICON_SMALL, (LPARAM)icon);
+    SendMessage(hWndApp, WM_SETICON, ICON_BIG, (LPARAM)icon);
 
     const int event_count = 1;
     HANDLE events[event_count];
