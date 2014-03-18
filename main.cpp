@@ -2,6 +2,6 @@
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	tck::gui::ui_main application;
+    tck::gui::ui_main application;
     application.run(hInstance, nCmdShow);
 }

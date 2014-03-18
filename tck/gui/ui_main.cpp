@@ -7,10 +7,10 @@
  * Constructeur fenètre principale.
  **/
 tck::gui::ui_main::ui_main() :
-	nui_sensor(NULL),
-	D2DFactory(NULL),
-	next_kinect_event(INVALID_HANDLE_VALUE),
-	cout_update(0)
+    nui_sensor(NULL),
+    D2DFactory(NULL),
+    next_kinect_event(INVALID_HANDLE_VALUE),
+    cout_update(0)
 {
 }
 
@@ -19,11 +19,10 @@ tck::gui::ui_main::ui_main() :
  **/
 tck::gui::ui_main::~ui_main()
 {
-	kinect_stop();
+    kinect_stop();
 
-	DiscardDirect2DResources();
-	safe_release(D2DFactory);
-	
+    DiscardDirect2DResources();
+    safe_release(D2DFactory);
 }
 
 /**
@@ -31,14 +30,14 @@ tck::gui::ui_main::~ui_main()
  **/
 int tck::gui::ui_main::run(HINSTANCE _hInstance, int nCmdShow)
 {
-	// Console de debug
-	AllocConsole() ;
-	AttachConsole(GetCurrentProcessId());
-	freopen("CON", "w", stdout);
+    // Console de debug
+    AllocConsole() ;
+    AttachConsole(GetCurrentProcessId());
+    freopen("CON", "w", stdout);
 
-	MSG       msg = {0};
+    MSG       msg = {0};
     WNDCLASS  wc  = {0};
-	hInstance = _hInstance;
+    hInstance = _hInstance;
 
     // Paramétrage de la fenetre
     wc.style         = CS_HREDRAW | CS_VREDRAW;
@@ -59,7 +58,7 @@ int tck::gui::ui_main::run(HINSTANCE _hInstance, int nCmdShow)
         hInstance,
         MAKEINTRESOURCE(IDD_MAIN),
         NULL,
-		(DLGPROC)tck::gui::ui_main::event_router,
+        (DLGPROC)tck::gui::ui_main::event_router,
         reinterpret_cast<LPARAM>(this));
 
     // Afficher la fenetre
@@ -71,17 +70,17 @@ int tck::gui::ui_main::run(HINSTANCE _hInstance, int nCmdShow)
     // Boucle principale
     while (WM_QUIT != msg.message)
     {
-		events[0] = next_kinect_event;
+        events[0] = next_kinect_event;
 
-		// Vérifier s'il y a de nouveaux messages (QS_ALLINPUT)
-		// ou des events Kinect (events)
-		// La fonction update() vérifira les events invalide, dans où plus d'un est signaler
+        // Vérifier s'il y a de nouveaux messages (QS_ALLINPUT)
+        // ou des events Kinect (events)
+        // La fonction update() vérifira les events invalide, dans où plus d'un est signaler
         MsgWaitForMultipleObjects(event_count, events, FALSE, INFINITE, QS_ALLINPUT);
 
         // Explicitly check the Kinect frame event since MsgWaitForMultipleObjects
         // can return for other reasons even though it is signaled.
-		
-		// Mise à jour du traitement de la Kinect
+
+        // Mise à jour du traitement de la Kinect
         kinect_update();
 
         while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE))
@@ -105,24 +104,24 @@ int tck::gui::ui_main::run(HINSTANCE _hInstance, int nCmdShow)
  **/
 LRESULT CALLBACK tck::gui::ui_main::event_router(HWND _hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	ui_main* pThis = NULL;
+    ui_main* pThis = NULL;
 
-	if (uMsg == WM_INITDIALOG)
-	{
-		pThis = reinterpret_cast<ui_main*>(lParam);
+    if (uMsg == WM_INITDIALOG)
+    {
+        pThis = reinterpret_cast<ui_main*>(lParam);
         SetWindowLongPtr(_hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pThis)); 
-	}
-	else
-	{
-		pThis = reinterpret_cast<ui_main*>(GetWindowLongPtr(_hWnd, GWLP_USERDATA));
-	}
+    }
+    else
+    {
+        pThis = reinterpret_cast<ui_main*>(GetWindowLongPtr(_hWnd, GWLP_USERDATA));
+    }
 
-	if (pThis)
-	{
-		return pThis->event_handle(_hWnd, uMsg, wParam, lParam);
-	}
+    if (pThis)
+    {
+        return pThis->event_handle(_hWnd, uMsg, wParam, lParam);
+    }
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -130,34 +129,34 @@ LRESULT CALLBACK tck::gui::ui_main::event_router(HWND _hWnd, UINT uMsg, WPARAM w
  **/
 LRESULT CALLBACK tck::gui::ui_main::event_handle(HWND _hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	switch(message)
-	{
-		case WM_INITDIALOG:
-			hWnd = _hWnd;
-			
-			kinect_init();
-			D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &D2DFactory);
+    switch(message)
+    {
+        case WM_INITDIALOG:
+            hWnd = _hWnd;
 
-			// Chargement des icones des menus
-			load_menu_icon(hWnd, 0, 0, IDB_FILE_EXIT);
-			load_menu_icon(hWnd, 1, 0, IDB_KINECT_START);
-			load_menu_icon(hWnd, 1, 1, IDB_KINECT_STOP);
-			break;
+            kinect_init();
+            D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &D2DFactory);
 
-		case WM_CLOSE:
-			DestroyWindow(hWnd);
-			break;
+            // Chargement des icones des menus
+            load_menu_icon(hWnd, 0, 0, IDB_FILE_EXIT);
+            load_menu_icon(hWnd, 1, 0, IDB_KINECT_START);
+            load_menu_icon(hWnd, 1, 1, IDB_KINECT_STOP);
+            break;
 
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			break;
+        case WM_CLOSE:
+            DestroyWindow(hWnd);
+            break;
 
-		case WM_COMMAND:
-			command_handle(hWnd, message, wParam, lParam);
-			break;
-	}
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            break;
 
-	return FALSE;
+        case WM_COMMAND:
+            command_handle(hWnd, message, wParam, lParam);
+            break;
+    }
+
+    return FALSE;
 }
 
 /**
@@ -165,47 +164,47 @@ LRESULT CALLBACK tck::gui::ui_main::event_handle(HWND _hWnd, UINT message, WPARA
  **/
 HRESULT tck::gui::ui_main::kinect_init()
 {
-	INuiSensor* pNuiSensor;
+    INuiSensor* pNuiSensor;
 
-	int sensor_count = 0;
-	HRESULT hr = NuiGetSensorCount(&sensor_count);
+    int sensor_count = 0;
+    HRESULT hr = NuiGetSensorCount(&sensor_count);
 
-	if (FAILED(hr))
-		return hr;
+    if (FAILED(hr))
+        return hr;
 
-	// Verification de tout les capteurs de la Kinect
-	for (int i = 0; i < sensor_count; ++i)
-	{
-		// Création des capteur pour vérifier leur état
-		hr = NuiCreateSensorByIndex(i, &pNuiSensor);
-		if (FAILED(hr))
-			continue;
+    // Verification de tout les capteurs de la Kinect
+    for (int i = 0; i < sensor_count; ++i)
+    {
+        // Création des capteur pour vérifier leur état
+        hr = NuiCreateSensorByIndex(i, &pNuiSensor);
+        if (FAILED(hr))
+            continue;
 
-		// Récupération du status du capteur, si connecté -> initalisation
-		hr = pNuiSensor->NuiStatus();
-		if (hr == S_OK)
-		{
-			nui_sensor = pNuiSensor;
-			break;
-		}
+        // Récupération du status du capteur, si connecté -> initalisation
+        hr = pNuiSensor->NuiStatus();
+        if (hr == S_OK)
+        {
+            nui_sensor = pNuiSensor;
+            break;
+        }
 
-		// Capteur non fonctionnel, détachement
-		pNuiSensor->Release();
-	}
+        // Capteur non fonctionnel, détachement
+        pNuiSensor->Release();
+    }
 
-	if (nui_sensor != NULL)
-	{
-		// Initialisation du capteur du squelette
-		hr = nui_sensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_SKELETON);
-	}
+    if (nui_sensor != NULL)
+    {
+        // Initialisation du capteur du squelette
+        hr = nui_sensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_SKELETON);
+    }
 
-	if (nui_sensor == NULL || FAILED(hr))
-	{
-		set_status_message("Aucune Kinect trouvée");
-		return E_FAIL;
-	}
+    if (nui_sensor == NULL || FAILED(hr))
+    {
+        set_status_message("Aucune Kinect trouvée");
+        return E_FAIL;
+    }
 
-	set_status_message("Kinect initialisée");
+    set_status_message("Kinect initialisée");
 }
 
 /**
@@ -213,21 +212,19 @@ HRESULT tck::gui::ui_main::kinect_init()
 **/
 void tck::gui::ui_main::kinect_start()
 {
-	if (nui_sensor != NULL)
-	{
-		/*if (SUCCEEDED(hr))
-		{*/
-		// Création d'un évenement pour signaler de nouvelles données du squette
-		next_kinect_event = CreateEvent(NULL, TRUE, FALSE, NULL);
+    if (nui_sensor != NULL)
+    {
+        /*if (SUCCEEDED(hr))
+        {*/
+            // Création d'un évenement pour signaler de nouvelles données du squette
+            next_kinect_event = CreateEvent(NULL, TRUE, FALSE, NULL);
 
-		// Activation du flux de données du squelette
-		/*hr =*/ nui_sensor->NuiSkeletonTrackingEnable(next_kinect_event, 0);
-		//}
-	}
-    
-	set_status_message("Kinect démarrée");
+            // Activation du flux de données du squelette
+            /*hr =*/ nui_sensor->NuiSkeletonTrackingEnable(next_kinect_event, 0);
 
-    //return hr;
+            set_status_message("Kinect démarrée");
+        //}
+    }
 }
 
 /**
@@ -235,18 +232,18 @@ void tck::gui::ui_main::kinect_start()
 **/
 void tck::gui::ui_main::kinect_stop()
 {
-	if (nui_sensor != NULL)
-	{
-		ResetEvent(next_kinect_event);
+    if (nui_sensor != NULL)
+    {
+        ResetEvent(next_kinect_event);
 
-		nui_sensor->NuiSkeletonTrackingDisable();
-		//nui_sensor->NuiShutdown(); // Eteint la Kinect, useless :)
-		//safe_release(nui_sensor);
-		cout_update = 0;
-		std::cout << "\rx0               ";
+        nui_sensor->NuiSkeletonTrackingDisable();
+        //nui_sensor->NuiShutdown(); // Eteint la Kinect, useless :)
+        //safe_release(nui_sensor);
+        cout_update = 0;
+        std::cout << "\rx0               ";
 
-		set_status_message("Kinect arrêtée");
-	}
+        set_status_message("Kinect arrêtée");
+    }
 }
 
 /**
@@ -254,14 +251,14 @@ void tck::gui::ui_main::kinect_stop()
  **/
 void tck::gui::ui_main::kinect_update()
 {
-	if (nui_sensor == NULL)
-		return;
+    if (nui_sensor == NULL)
+        return;
 
-	// Attente de traitement des données du squelette
+    // Attente de traitement des données du squelette
     if (WaitForSingleObject(next_kinect_event, 0) == WAIT_OBJECT_0)
     {
-		cout_update++;
-		std::cout << "\rx" << cout_update;
+        cout_update++;
+        std::cout << "\rx" << cout_update;
         //ProcessSkeleton();
     }
 }
@@ -271,14 +268,14 @@ void tck::gui::ui_main::kinect_update()
  **/
 void tck::gui::ui_main::load_menu_icon(HWND _hWnd, int menu_id, int submenu_id, int icon_id)
 {
-	HMENU menubar = GetMenu(_hWnd); 
+    HMENU menubar = GetMenu(_hWnd);
 
-	HMENU menu = GetSubMenu(menubar, menu_id);
-	UINT submenu = GetMenuItemID(menu, submenu_id);
+    HMENU menu = GetSubMenu(menubar, menu_id);
+    UINT submenu = GetMenuItemID(menu, submenu_id);
 
-	HBITMAP icon = (HBITMAP)LoadImage(hInstance, MAKEINTRESOURCE(icon_id), IMAGE_BITMAP, 0, 0, 0);
-				
-	SetMenuItemBitmaps(menubar, submenu, 0, icon, icon);
+    HBITMAP icon = (HBITMAP)LoadImage(hInstance, MAKEINTRESOURCE(icon_id), IMAGE_BITMAP, 0, 0, 0);
+
+    SetMenuItemBitmaps(menubar, submenu, 0, icon, icon);
 }
 
 /**
@@ -286,16 +283,16 @@ void tck::gui::ui_main::load_menu_icon(HWND _hWnd, int menu_id, int submenu_id, 
 **/
 void tck::gui::ui_main::command_handle(HWND _hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	if (ID_KINECT_START == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
-	{
-		//kinect_init();
-		kinect_start();
-	}
-	
-	if (ID_KINECT_STOP == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
-		kinect_stop();
-	if (ID_FICHIER_QUITTER == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
-		DestroyWindow(_hWnd);
+    if (ID_KINECT_START == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
+    {
+        //kinect_init();
+        kinect_start();
+    }
+
+    if (ID_KINECT_STOP == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
+        kinect_stop();
+    if (ID_FICHIER_QUITTER == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
+        DestroyWindow(_hWnd);
 }
 
 /**
@@ -303,17 +300,17 @@ void tck::gui::ui_main::command_handle(HWND _hWnd, UINT message, WPARAM wParam, 
 **/
 void tck::gui::ui_main::set_status_message(std::string message)
 {
-	std::ostringstream msg;
-	msg << " " << message;
-	SendDlgItemMessage(hWnd, IDC_STATUS, WM_SETTEXT, 0, (LPARAM)msg.str().c_str());
+    std::ostringstream msg;
+    msg << " " << message;
+    SendDlgItemMessage(hWnd, IDC_STATUS, WM_SETTEXT, 0, (LPARAM)msg.str().c_str());
 }
 
 void tck::gui::ui_main::DiscardDirect2DResources()
 {
-	/*safe_release(m_pRenderTarget);
+    /*safe_release(m_pRenderTarget);
 
-	safe_release(m_pBrushJointTracked);
-	safe_release(m_pBrushJointInferred);
-	safe_release(m_pBrushBoneTracked);
-	safe_release(m_pBrushBoneInferred);*/
+    safe_release(m_pBrushJointTracked);
+    safe_release(m_pBrushJointInferred);
+    safe_release(m_pBrushBoneTracked);
+    safe_release(m_pBrushBoneInferred);*/
 }
