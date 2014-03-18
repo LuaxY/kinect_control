@@ -33,7 +33,7 @@ private:
     ID2D1Factory* D2DFactory;
 
     /** Fonctions **/
-    void command_handle(HWND _hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+    void command_handle(UINT message, WPARAM wParam, LPARAM lParam);
     void set_status_message(std::string message);
     void DiscardDirect2DResources();
 
@@ -46,7 +46,7 @@ private:
     void kinect_stop();
     void kinect_update();
 
-    void load_menu_icon(HWND hWnd, int menu_id, int submenu_id, int icon_id);
+    void load_menu_icon(int menu_id, int submenu_id, int icon_id);
 };
 
 } // namespace gui

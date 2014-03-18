@@ -138,9 +138,9 @@ LRESULT CALLBACK tck::gui::ui_main::event_handle(HWND _hWnd, UINT message, WPARA
             D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &D2DFactory);
 
             // Chargement des icones des menus
-            load_menu_icon(hWnd, 0, 0, IDB_FILE_EXIT);
-            load_menu_icon(hWnd, 1, 0, IDB_KINECT_START);
-            load_menu_icon(hWnd, 1, 1, IDB_KINECT_STOP);
+            load_menu_icon(0, 0, IDB_FILE_EXIT);
+            load_menu_icon(1, 0, IDB_KINECT_START);
+            load_menu_icon(1, 1, IDB_KINECT_STOP);
             break;
 
         case WM_CLOSE:
@@ -152,7 +152,7 @@ LRESULT CALLBACK tck::gui::ui_main::event_handle(HWND _hWnd, UINT message, WPARA
             break;
 
         case WM_COMMAND:
-            command_handle(hWnd, message, wParam, lParam);
+            command_handle(message, wParam, lParam);
             break;
     }
 
@@ -196,6 +196,12 @@ HRESULT tck::gui::ui_main::kinect_init()
     {
         // Initialisation du capteur du squelette
         hr = nui_sensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_SKELETON);
+
+        if (SUCCEEDED(hr))
+        {
+            set_status_message("Kinect initialisée");
+            return hr;
+        }
     }
 
     if (nui_sensor == NULL || FAILED(hr))
@@ -203,8 +209,6 @@ HRESULT tck::gui::ui_main::kinect_init()
         set_status_message("Aucune Kinect trouvée");
         return E_FAIL;
     }
-
-    set_status_message("Kinect initialisée");
 }
 
 /**
@@ -214,16 +218,13 @@ void tck::gui::ui_main::kinect_start()
 {
     if (nui_sensor != NULL)
     {
-        /*if (SUCCEEDED(hr))
-        {*/
-            // Création d'un évenement pour signaler de nouvelles données du squette
-            next_kinect_event = CreateEvent(NULL, TRUE, FALSE, NULL);
+        // Création d'un évenement pour signaler de nouvelles données du squette
+        next_kinect_event = CreateEvent(NULL, TRUE, FALSE, NULL);
 
-            // Activation du flux de données du squelette
-            /*hr =*/ nui_sensor->NuiSkeletonTrackingEnable(next_kinect_event, 0);
+        // Activation du flux de données du squelette
+        /*hr =*/ nui_sensor->NuiSkeletonTrackingEnable(next_kinect_event, 0);
 
-            set_status_message("Kinect démarrée");
-        //}
+        set_status_message("Kinect démarrée");
     }
 }
 
@@ -266,9 +267,9 @@ void tck::gui::ui_main::kinect_update()
 /**
  * Fonction d'ajout d'icones sur les menus.
  **/
-void tck::gui::ui_main::load_menu_icon(HWND _hWnd, int menu_id, int submenu_id, int icon_id)
+void tck::gui::ui_main::load_menu_icon(int menu_id, int submenu_id, int icon_id)
 {
-    HMENU menubar = GetMenu(_hWnd);
+    HMENU menubar = GetMenu(hWnd);
 
     HMENU menu = GetSubMenu(menubar, menu_id);
     UINT submenu = GetMenuItemID(menu, submenu_id);
@@ -281,7 +282,7 @@ void tck::gui::ui_main::load_menu_icon(HWND _hWnd, int menu_id, int submenu_id, 
 /**
 * Fonction de traitement des commandes.
 **/
-void tck::gui::ui_main::command_handle(HWND _hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void tck::gui::ui_main::command_handle(UINT message, WPARAM wParam, LPARAM lParam)
 {
     if (ID_KINECT_START == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
     {
@@ -292,7 +293,7 @@ void tck::gui::ui_main::command_handle(HWND _hWnd, UINT message, WPARAM wParam, 
     if (ID_KINECT_STOP == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
         kinect_stop();
     if (ID_FICHIER_QUITTER == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
-        DestroyWindow(_hWnd);
+        DestroyWindow(hWnd);
 }
 
 /**
