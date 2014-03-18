@@ -20,7 +20,8 @@ tck::gui::ui_main::ui_main() :
 tck::gui::ui_main::~ui_main()
 {
     kinect_stop();
-
+    //nui_sensor->NuiShutdown(); // possible deadlock -> Dev Microsoft = Je code avec le cul
+    safe_release(nui_sensor);
     DiscardDirect2DResources();
     safe_release(D2DFactory);
 }
@@ -31,15 +32,15 @@ tck::gui::ui_main::~ui_main()
 int tck::gui::ui_main::run(HINSTANCE _hInstance, int nCmdShow)
 {
     // Console de debug
-    /*AllocConsole();
+    AllocConsole();
     AttachConsole(GetCurrentProcessId());
-    freopen("CON", "w", stdout);*/
+    freopen("CON", "w", stdout);
 
     MSG       msg = {0};
     WNDCLASSEX  wc  = {0};
-    hInstance = _hInstance;
-
     HICON icon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
+
+    hInstance = _hInstance;
 
     // Paramétrage de la fenetre
     wc.cbSize        = sizeof(wc);
@@ -54,8 +55,7 @@ int tck::gui::ui_main::run(HINSTANCE _hInstance, int nCmdShow)
 
     if(!RegisterClassEx(&wc))
     {
-        int err = GetLastError();
-        return 0;
+        return -1;
     }
 
     // Création de la fenetre principale
@@ -246,8 +246,6 @@ void tck::gui::ui_main::kinect_stop()
         ResetEvent(next_kinect_event);
 
         nui_sensor->NuiSkeletonTrackingDisable();
-        //nui_sensor->NuiShutdown(); // Eteint la Kinect, useless :)
-        //safe_release(nui_sensor);
         cout_update = 0;
         std::cout << "\rx0               ";
 
@@ -293,11 +291,7 @@ void tck::gui::ui_main::load_menu_icon(int menu_id, int submenu_id, int icon_id)
 void tck::gui::ui_main::command_handle(UINT message, WPARAM wParam, LPARAM lParam)
 {
     if(ID_KINECT_START == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
-    {
-        //kinect_init();
         kinect_start();
-    }
-
     if(ID_KINECT_STOP == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
         kinect_stop();
     if(ID_FICHIER_QUITTER == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
