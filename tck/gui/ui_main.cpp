@@ -9,7 +9,8 @@
 tck::gui::ui_main::ui_main() :
 	nui_sensor(NULL),
 	D2DFactory(NULL),
-	next_kinect_event(INVALID_HANDLE_VALUE)
+	next_kinect_event(INVALID_HANDLE_VALUE),
+	cout_update(0)
 {
 }
 
@@ -20,7 +21,7 @@ tck::gui::ui_main::~ui_main()
 {
 	kinect_stop();
 
-	//DiscardDirect2DResources();
+	DiscardDirect2DResources();
 	safe_release(D2DFactory);
 	
 }
@@ -133,8 +134,8 @@ LRESULT CALLBACK tck::gui::ui_main::event_handle(HWND _hWnd, UINT message, WPARA
 	{
 		case WM_INITDIALOG:
 			hWnd = _hWnd;
-
-			std::cout << "Demarrage Kinect" << std::endl;
+			
+			kinect_init();
 			D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &D2DFactory);
 
 			// Chargement des icones des menus
@@ -162,57 +163,71 @@ LRESULT CALLBACK tck::gui::ui_main::event_handle(HWND _hWnd, UINT message, WPARA
 /**
  * Fonction d'initalisation de la Kinect.
  **/
-HRESULT tck::gui::ui_main::kinect_start()
+HRESULT tck::gui::ui_main::kinect_init()
 {
 	INuiSensor* pNuiSensor;
 
-    int sensor_count = 0;
+	int sensor_count = 0;
 	HRESULT hr = NuiGetSensorCount(&sensor_count);
 
-    if (FAILED(hr))
-        return hr;
+	if (FAILED(hr))
+		return hr;
 
-    // Verification de tout les capteurs de la Kinect
-	for(int i = 0; i < sensor_count; ++i)
-    {
+	// Verification de tout les capteurs de la Kinect
+	for (int i = 0; i < sensor_count; ++i)
+	{
 		// Création des capteur pour vérifier leur état
-        hr = NuiCreateSensorByIndex(i, &pNuiSensor);
-        if (FAILED(hr))
-            continue;
+		hr = NuiCreateSensorByIndex(i, &pNuiSensor);
+		if (FAILED(hr))
+			continue;
 
 		// Récupération du status du capteur, si connecté -> initalisation
-        hr = pNuiSensor->NuiStatus();
-        if (hr == S_OK)
-        {
-            nui_sensor = pNuiSensor;
-            break;
-        }
+		hr = pNuiSensor->NuiStatus();
+		if (hr == S_OK)
+		{
+			nui_sensor = pNuiSensor;
+			break;
+		}
 
 		// Capteur non fonctionnel, détachement
-        pNuiSensor->Release();
-    }
+		pNuiSensor->Release();
+	}
 
-    if (nui_sensor != NULL)
-    {
-        // Initialize the Kinect and specify that we'll be using skeleton
-        hr = nui_sensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_SKELETON); 
-        if (SUCCEEDED(hr))
-        {
-            // Create an event that will be signaled when skeleton data is available
-            next_kinect_event = CreateEventW(NULL, TRUE, FALSE, NULL);
+	if (nui_sensor != NULL)
+	{
+		// Initialisation du capteur du squelette
+		hr = nui_sensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_SKELETON);
+	}
 
-            // Open a skeleton stream to receive skeleton data
-            hr = nui_sensor->NuiSkeletonTrackingEnable(next_kinect_event, 0); 
-        }
-    }
-
-    if (nui_sensor == NULL || FAILED(hr))
-    {
+	if (nui_sensor == NULL || FAILED(hr))
+	{
 		set_status_message("Aucune Kinect trouvée");
-        return E_FAIL;
-    }
+		return E_FAIL;
+	}
 
-    return hr;
+	set_status_message("Kinect initialisée");
+}
+
+/**
+* Fonction de démarrage de la Kinect.
+**/
+void tck::gui::ui_main::kinect_start()
+{
+	if (nui_sensor != NULL)
+	{
+		/*if (SUCCEEDED(hr))
+		{*/
+		// Création d'un évenement pour signaler de nouvelles données du squette
+		next_kinect_event = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+		// Activation du flux de données du squelette
+		/*hr =*/ nui_sensor->NuiSkeletonTrackingEnable(next_kinect_event, 0);
+		//}
+	}
+    
+	set_status_message("Kinect démarrée");
+
+    //return hr;
 }
 
 /**
@@ -222,11 +237,16 @@ void tck::gui::ui_main::kinect_stop()
 {
 	if (nui_sensor != NULL)
 	{
-		//nui_sensor->NuiSkeletonTrackingDisable();
-		//nui_sensor->NuiShutdown();
-	}
+		ResetEvent(next_kinect_event);
 
-	safe_release(nui_sensor);
+		nui_sensor->NuiSkeletonTrackingDisable();
+		//nui_sensor->NuiShutdown(); // Eteint la Kinect, useless :)
+		//safe_release(nui_sensor);
+		cout_update = 0;
+		std::cout << "\rx0               ";
+
+		set_status_message("Kinect arrêtée");
+	}
 }
 
 /**
@@ -237,10 +257,11 @@ void tck::gui::ui_main::kinect_update()
 	if (nui_sensor == NULL)
 		return;
 
-	// Wait for 0ms, just quickly test if it is time to process a skeleton
+	// Attente de traitement des données du squelette
     if (WaitForSingleObject(next_kinect_event, 0) == WAIT_OBJECT_0)
     {
-		std::cout << "Mise a jour Kinect" << std::endl;
+		cout_update++;
+		std::cout << "\rx" << cout_update;
         //ProcessSkeleton();
     }
 }
@@ -250,7 +271,7 @@ void tck::gui::ui_main::kinect_update()
  **/
 void tck::gui::ui_main::load_menu_icon(HWND _hWnd, int menu_id, int submenu_id, int icon_id)
 {
-	HMENU menubar = GetMenu(_hWnd);
+	HMENU menubar = GetMenu(_hWnd); 
 
 	HMENU menu = GetSubMenu(menubar, menu_id);
 	UINT submenu = GetMenuItemID(menu, submenu_id);
@@ -266,9 +287,15 @@ void tck::gui::ui_main::load_menu_icon(HWND _hWnd, int menu_id, int submenu_id, 
 void tck::gui::ui_main::command_handle(HWND _hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (ID_KINECT_START == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
+	{
+		//kinect_init();
 		kinect_start();
+	}
+	
 	if (ID_KINECT_STOP == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
 		kinect_stop();
+	if (ID_FICHIER_QUITTER == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
+		DestroyWindow(_hWnd);
 }
 
 /**

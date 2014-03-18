@@ -1,12 +1,14 @@
-#ifndef KINECT_HPP
-#define KINECT_HPP
+#ifndef SKELETON_HPP
+#define SKELETON_HPP
 
 #include <windows.h>
+
+#include "tck/kinect/kinect.hpp"
 
 namespace tck {
 namespace kinect {
 
-class skeleton/* : public kinect*/
+class skeleton : public kinect
 {
 
 };
@@ -14,4 +16,4 @@ class skeleton/* : public kinect*/
 } // namespace kinect
 } // namespace tck
 
-#endif // KINECT_HPP
+#endif // SKELETON_HPP

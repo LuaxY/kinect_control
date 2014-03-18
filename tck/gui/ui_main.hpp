@@ -27,6 +27,7 @@ private:
     //INuiSensor* nui_sensor;
 	INuiSensor* nui_sensor;
 	HANDLE next_kinect_event;
+	int cout_update;
 
 	// Direct2D
     ID2D1Factory* D2DFactory;
@@ -40,7 +41,8 @@ private:
 	LRESULT CALLBACK event_handle(HWND _hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	// Fonctions Kinect
-	HRESULT kinect_start();
+	HRESULT kinect_init();
+	void kinect_start();
 	void kinect_stop();
 	void kinect_update();
 
