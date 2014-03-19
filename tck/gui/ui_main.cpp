@@ -38,7 +38,7 @@ int tck::gui::ui_main::run(HINSTANCE _hInstance, int nCmdShow)
 
     MSG       msg = {0};
     WNDCLASSEX  wc  = {0};
-    HICON icon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
+    HICON icon = LoadIcon(_hInstance, MAKEINTRESOURCE(IDI_ICON));
 
     hInstance = _hInstance;
 
