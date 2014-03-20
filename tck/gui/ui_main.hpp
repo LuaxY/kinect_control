@@ -1,65 +1,48 @@
 #ifndef UI_MAIN_HPP
 #define UI_MAIN_HPP
 
+#include "tck/gui/NuiViewer.hpp"
+
 #include <windows.h>
-#include <d2d1.h>
-#include <NuiApi.h>
 #include <string>
 #include <sstream>
 
-namespace tck {
-namespace gui {
-
-class ui_main
+class ui_main : public NuiViewer
 {
 public:
+
     ui_main();
+
     ~ui_main();
-    int run(HINSTANCE hInstance, int nCmdShow);
-    static LRESULT CALLBACK event_router(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+    /// <summary>
+    /// Traitement des message
+    /// </summary>
+    /// <param name="hWnd">Propriétaire du message</param>
+    /// <param name="uMsg">Message</param>
+    /// <param name="wParam">Données du message</param>
+    /// <param name="lParam">Données additionnel du message</param>
+    /// <returns>resultat du traitement du message</returns>
+    LRESULT DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+    /// <summary>
+    /// Création de la fenetre principale et débuter le traitement
+    /// </summary>
+    int Run();
 
 private:
-    /** Variables **/
-    HINSTANCE hInstance;
-    HWND hWnd;
-
-    // Kinect
-    //INuiSensor* nui_sensor;
-    INuiSensor* nui_sensor;
-    HANDLE next_kinect_event;
-    int cout_update;
-
-    // Direct2D
-    ID2D1Factory* D2DFactory;
-
-    /** Fonctions **/
-    void command_handle(UINT message, WPARAM wParam, LPARAM lParam);
-    void set_status_message(std::string message);
-    void DiscardDirect2DResources();
-
-    // Fonctions Events
-    LRESULT CALLBACK event_handle(HWND _hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-    // Fonctions Kinect
-    HRESULT kinect_init();
-    void kinect_start();
-    void kinect_stop();
-    void kinect_update();
-
-    void load_menu_icon(int menu_id, int submenu_id, int icon_id);
-};
-
-} // namespace gui
-} // namespace tck
-
-template<class T>
-inline void safe_release(T *& ptr)
-{
-    if (ptr != NULL)
+    /// <summary>
+    /// Returns the ID of the dialog
+    /// </summary>
+    UINT GetDlgId()
     {
-        ptr->Release();
-        ptr = NULL;
+        return IDD_MAIN;
     }
-}
+
+    /// <summary>
+    /// This method will initialize all the members and enumerate all the sensors
+    /// </summary>
+    void InitializeResource();
+};
 
 #endif // UI_MAIN_HPP
