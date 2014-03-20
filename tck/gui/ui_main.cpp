@@ -142,13 +142,14 @@ LRESULT CALLBACK tck::gui::ui_main::event_handle(HWND _hWnd, UINT message, WPARA
         case WM_INITDIALOG:
             hWnd = _hWnd;
 
-            kinect_init();
             D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &D2DFactory);
+            kinect_init();
 
             // Chargement des icones des menus
             load_menu_icon(0, 0, IDB_FILE_EXIT);
             load_menu_icon(1, 0, IDB_KINECT_START);
             load_menu_icon(1, 1, IDB_KINECT_STOP);
+
             break;
 
         case WM_CLOSE:
@@ -190,8 +191,10 @@ HRESULT tck::gui::ui_main::kinect_init()
 
         // Récupération du status du capteur, si connecté -> initalisation
         hr = pNuiSensor->NuiStatus();
+
         if(hr == S_OK)
         {
+            std::cout << "device connection ID: " << pNuiSensor->NuiDeviceConnectionId() << std::endl;
             nui_sensor = pNuiSensor;
             break;
         }
