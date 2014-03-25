@@ -1,19 +1,20 @@
 #ifndef UI_MAIN_HPP
 #define UI_MAIN_HPP
 
-#include "tck/gui/NuiViewer.hpp"
+#include "tck/kinect/NuiViewer.hpp"
+#include "tck/kinect/NuiSkeletonStream.hpp"
 
 #include <windows.h>
 #include <string>
 #include <sstream>
 
-class ui_main : public NuiViewer
+class uiMain : public NuiViewer
 {
 public:
 
-    ui_main();
+    uiMain();
 
-    ~ui_main();
+    ~uiMain();
 
     /// <summary>
     /// Traitement des message
@@ -32,7 +33,7 @@ public:
 
 private:
     /// <summary>
-    /// Returns the ID of the dialog
+    /// Retourn l'ID de la boîte de dialoge
     /// </summary>
     UINT GetDlgId()
     {
@@ -40,9 +41,30 @@ private:
     }
 
     /// <summary>
-    /// This method will initialize all the members and enumerate all the sensors
+    /// Enumération et initialisation des capteurs
     /// </summary>
     void InitializeResource();
+
+    /// <summary>
+    /// Traitement des commandes windows
+    /// </summary>
+    void HandleCommand(UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+    /// <summary>
+    /// Modifie le message d'état
+    /// <param name="message">Message</param>
+    /// </summary>
+    void SetStatusMessage(std::string message);
+
+    /* TEST ZONE */
+    HANDLE                  m_hStopStreamEventThread;
+    INuiSensor*             m_pNuiSensor;
+    NuiSkeletonStream*      m_pSkeletonStream;
+    NuiStreamViewer*        m_pPrimaryView;
+
+    void GetSensor();
+    static void WINAPI StreamEventThread(uiMain*);
+    void MessageLoop();
 };
 
 #endif // UI_MAIN_HPP

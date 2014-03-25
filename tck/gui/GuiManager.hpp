@@ -1,19 +1,19 @@
-#ifndef NUI_VIEWER_HPP
-#define NUI_VIEWER_HPP
+#ifndef GUI_MANAGER_HPP
+#define GUI_MANAGER_HPP
 
 #include "tck/gui/res_main/resource.h"
 
 #include <windows.h>
 #include <memory>
 
-class NuiViewer
+class GuiManager
 {
 public:
     /// <summary>
     /// Constructeur
     /// </summary>
     /// <param name="pParent">Pointeur sur la fenètre parent</param>
-    NuiViewer(const NuiViewer* pParent);
+    GuiManager(const GuiManager* pParent);
 
     /// <summary>
     /// Création de la fenetre
@@ -46,8 +46,9 @@ public:
 
 protected:
     HWND               m_hWnd;
-    const   NuiViewer* m_pParent;
+    const   GuiManager* m_pParent;
     static  HICON      SensorIcon;
+    HINSTANCE          m_hInstance;
 
     /// <summary>
     /// Dispatche les messages aux fenètre correspondant
@@ -92,4 +93,4 @@ protected:
     void SetMenuIcon(int MenuId, int SubmenuId, int IconId);
 };
 
-#endif // NUI_VIEWER_HPP
+#endif // GUI_MANAGER_HPP
