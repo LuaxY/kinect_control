@@ -25,6 +25,7 @@ int uiMain::Run()
 
     /* ----------------------------- */
     m_pPrimaryView = new NuiStreamViewer(this);
+    //m_pPrimaryView = new NuiStreamViewer(nullptr);
 
     m_pNuiSensor = nullptr;
     GetSensor();
@@ -33,6 +34,7 @@ int uiMain::Run()
     {
         m_pSkeletonStream = new NuiSkeletonStream(m_pNuiSensor);
         m_pSkeletonStream->SetStreamViewer(m_pPrimaryView);
+        //m_pSkeletonStream->SetChooserMode(ChooserModeActive1);
     }
     /* ----------------------------- */
 
@@ -134,9 +136,10 @@ LRESULT uiMain::DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             Resize();
             break;*/
 
-        /*case WM_PAINT:
-            DrawBreakLine();
-            break;*/
+        case WM_PAINT:
+            //DrawBreakLine();
+            std::cout << "paint" << std::endl;
+            break;
 
         /*case WM_GETMINMAXINFO:
         {
@@ -160,6 +163,9 @@ void uiMain::HandleCommand(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     if (ID_KINECT_START == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
     {
+        m_pPrimaryView->CreateView();
+        m_pPrimaryView->ShowView();
+
         MessageLoop();
         m_pSkeletonStream->StartStream();
         //KinectStream test;

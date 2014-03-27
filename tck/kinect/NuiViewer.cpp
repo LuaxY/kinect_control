@@ -30,7 +30,7 @@ bool NuiViewer::CreateView()
             hWndParent = m_pParent->GetWindow();
         }
 
-        WNDCLASSEX  wc = { 0 };
+        /*WNDCLASSEX  wc = { 0 };
         m_hInstance = GetModuleHandle(nullptr);
         HICON icon = LoadIcon(m_hInstance, MAKEINTRESOURCE(IDI_ICON));
 
@@ -47,7 +47,7 @@ bool NuiViewer::CreateView()
         if (!RegisterClassEx(&wc))
         {
             return FALSE;
-        }
+        }*/
 
         m_hWnd = CreateDialogParam(nullptr,
                                     MAKEINTRESOURCE(GetDlgId()),

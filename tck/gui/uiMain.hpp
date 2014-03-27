@@ -65,6 +65,7 @@ private:
     void GetSensor();
     static void WINAPI StreamEventThread(uiMain*);
     void MessageLoop();
+    void DrawBreakLine();
 };
 
 #endif // UI_MAIN_HPP
