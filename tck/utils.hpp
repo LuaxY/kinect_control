@@ -6,7 +6,7 @@
 #include "tck/gui/res_main/resource.h"
 
 #define WM_STREAMEVENT  WM_USER + 1
-#define WM_TIMEREVENT   WM_USER + 2
+#define WM_STATUSEVENT  WM_USER + 2
 
 #define CLOSING_FROM_STATUSCHANGED    1
 #define READING_TEXT_BUFFER_SIZE    128

@@ -1,5 +1,6 @@
 #include "tck/gui/uiMain.hpp"
 #include "tck/utils.hpp"
+#include "tck/logger.hpp"
 
 #include <iostream>
 
@@ -61,7 +62,7 @@ LRESULT uiMain::DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             SetMenuIcon(1, 0, IDB_KINECT_START);
             SetMenuIcon(1, 1, IDB_KINECT_STOP);
 
-            SetStatusMessage("Programme démarrée");
+            tck::logger(GetWindow()) << "Programme démarrée";
 
             // Set device status callback to monitor all sensor changes
             //NuiSetDeviceStatusCallback(StatusChangeCallback, reinterpret_cast<void*>(hWnd));
@@ -112,9 +113,8 @@ LRESULT uiMain::DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             std::cout << "stream" << std::endl;
             break;
 
-        case WM_TIMEREVENT:
-            //UpdateTimedStreams();
-            std::cout << "timer" << std::endl;
+        case WM_STATUSEVENT:
+            SetStatusMessage(reinterpret_cast<char*>(wParam));
             break;
 
         // Handle the Kinect sensor status change case
@@ -179,7 +179,7 @@ void uiMain::HandleCommand(UINT uMsg, WPARAM wParam, LPARAM lParam)
     std::cout << "commande non traitee" << std::endl;
 }
 
-void uiMain::SetStatusMessage(std::string message)
+void uiMain::SetStatusMessage(char* message)
 {
     std::ostringstream msg;
     msg << " " << message;
@@ -200,11 +200,7 @@ void uiMain::StreamEventThread(uiMain* pThis)
 
     while(true)
     {
-        std::cout << "loop" << std::endl;
-
         DWORD ret = WaitForMultipleObjects(ARRAYSIZE(events), events, FALSE, INFINITE);
-
-        std::cout << std::hex << ret << std::endl;
 
         if (WAIT_OBJECT_0 == ret)
             break;
@@ -224,10 +220,18 @@ void uiMain::GetSensor()
     {
         if (pNuiSensor->NuiStatus() == S_OK)
         {
-            std::cout << "device connection ID: " << pNuiSensor->NuiDeviceConnectionId() << std::endl;
-            m_pNuiSensor = pNuiSensor;
-            return;
+            tck::logger(GetWindow()) << "device connection ID: " << pNuiSensor->NuiDeviceConnectionId();
+
+            if (SUCCEEDED(pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_SKELETON)))
+            {
+                m_pNuiSensor = pNuiSensor;
+                return;
+            }
+            else
+                return;
         }
+        else
+            return;
     }
     else
     {

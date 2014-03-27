@@ -54,7 +54,7 @@ private:
     /// Modifie le message d'état
     /// <param name="message">Message</param>
     /// </summary>
-    void SetStatusMessage(std::string message);
+    void SetStatusMessage(char* message);
 
     /* TEST ZONE */
     HANDLE                  m_hStopStreamEventThread;
