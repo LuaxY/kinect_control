@@ -1,7 +1,7 @@
-#include <stdio.h>
-
 #include "tck/kinect/NuiStreamViewer.hpp"
 #include "tck/gui/res_main/resource.h"
+
+#include <stdio.h>
 
 /// <summary>
 /// Constructor
@@ -45,24 +45,24 @@ LRESULT NuiStreamViewer::DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 {
     switch (uMsg)
     {
-    case WM_CTLCOLORDLG:
-        // Set background color as black
-        return (LRESULT)GetStockObject(BLACK_BRUSH);
+		case WM_CTLCOLORDLG:
+			// Set background color as black
+			return (LRESULT)GetStockObject(BLACK_BRUSH);
 
-    case WM_PAINT:
-        OnPaint(wParam, lParam);
-        break;
+		case WM_PAINT:
+			OnPaint(wParam, lParam);
+			break;
 
-    case WM_SIZE:
-        {
-            UINT width  = LOWORD(lParam);
-            UINT height = HIWORD(lParam);
-            m_pImageRenderer->ResizeRenderTarget(width, height);
-        }
-        break;
+		case WM_SIZE:
+		{
+			UINT width  = LOWORD(lParam);
+			UINT height = HIWORD(lParam);
+			m_pImageRenderer->ResizeRenderTarget(width, height);
+			break;
+		}
 
-    default:
-        break;
+		default:
+			break;
     }
 
     return (LRESULT)FALSE;

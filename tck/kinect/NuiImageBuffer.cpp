@@ -1,5 +1,6 @@
-#include <cmath>
+
 #include "tck/kinect/NuiImageBuffer.hpp"
+#include <cmath>
 #include "tck/utils.hpp"
 
 #define BYTES_PER_PIXEL_RGB         4

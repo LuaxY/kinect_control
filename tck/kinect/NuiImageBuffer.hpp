@@ -2,7 +2,7 @@
 
 #include <NuiApi.h>
 
-#define MAX_PLAYER_INDEX    6
+#define MAX_PLAYER_INDEX 6
 
 enum DEPTH_TREATMENT
 {

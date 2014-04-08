@@ -163,12 +163,17 @@ void uiMain::HandleCommand(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     if (ID_KINECT_START == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
     {
-        m_pPrimaryView->CreateView();
-        m_pPrimaryView->ShowView();
+		if (m_pNuiSensor != nullptr)
+		{
+			m_pPrimaryView->CreateView();
+			m_pPrimaryView->ShowView();
 
-        MessageLoop();
-        m_pSkeletonStream->StartStream();
-        //KinectStream test;
+			MessageLoop();
+
+			m_pSkeletonStream->StartStream();
+			//KinectStream test;
+		}
+
         return;
     }
     if (ID_KINECT_STOP == LOWORD(wParam) && BN_CLICKED == HIWORD(wParam))
@@ -224,23 +229,22 @@ void uiMain::GetSensor()
 
     if (SUCCEEDED(NuiCreateSensorByIndex(0, &pNuiSensor)))
     {
-        if (pNuiSensor->NuiStatus() == S_OK)
-        {
-            tck::logger(GetWindow()) << "device connection ID: " << pNuiSensor->NuiDeviceConnectionId();
+		if (pNuiSensor->NuiStatus() == S_OK)
+		{
+			tck::logger(GetWindow()) << "device connection ID: " << pNuiSensor->NuiDeviceConnectionId();
 
-            if (SUCCEEDED(pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_SKELETON)))
-            {
-                m_pNuiSensor = pNuiSensor;
-                return;
-            }
-            else
-                return;
-        }
-        else
-            return;
+			if (SUCCEEDED(pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_SKELETON)))
+			{
+				m_pNuiSensor = pNuiSensor;
+				return;
+			}
+			else
+			{
+				tck::logger(GetWindow()) << "cannot initialize skeleton sensors";
+				return;
+			}
+		}
     }
-    else
-    {
-        return;
-    }
+
+	tck::logger(GetWindow()) << "kinect not found";
 }

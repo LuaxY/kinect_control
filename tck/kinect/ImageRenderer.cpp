@@ -38,7 +38,7 @@ HRESULT ImageRenderer::BeginDraw(HWND hWnd)
     {
         m_pRenderTarget->BeginDraw();
         m_pRenderTarget->Clear();
-    }
+   }
     else
     {
         DiscardDependentResources();
@@ -72,10 +72,12 @@ HRESULT ImageRenderer::EnsureDependentResourcesCreated(HWND hWnd)
         return E_INVALIDARG;
     }
 
-    if (!g_pDWriteFactory)
+	//D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &g_pDWriteFactory);
+
+    /*if (!g_pDWriteFactory)
     {
         return E_FAIL;
-    }
+    }*/
 
     if (m_hWnd != hWnd)
     {
